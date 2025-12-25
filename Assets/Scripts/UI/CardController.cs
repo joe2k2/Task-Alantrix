@@ -83,7 +83,8 @@ public class CardController : MonoBehaviour
         Vector3 startRotation = rectTransform.localEulerAngles;
         Vector3 midRotation = new Vector3(0, 90, 0);
         bool hasSwapped = false;
-        
+
+        EventManager.playCardFlip?.Invoke();
         while (elapsed < flipDuration)
         {
             elapsed += Time.deltaTime;

@@ -1,5 +1,6 @@
-using UnityEngine;
 using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
@@ -13,17 +14,22 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject wonPanel;
     [SerializeField] private TextMeshProUGUI wonStatsText;
     [SerializeField] private Button restartWonButton;
+    [SerializeField] private Button nextLevelButton;
+    [SerializeField] private Button homeWonButton;
 
     [Header("Game Over UI")]
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TextMeshProUGUI gameOverStatsText;
     [SerializeField] private Button restarGameOvertButton;
-    
+    [SerializeField] private Button homeLoseButton;
+
     private void Awake()
     {
         restartWonButton.onClick.AddListener(OnRestartClicked);
         restarGameOvertButton.onClick.AddListener(OnRestartClicked);
-        
+        nextLevelButton.onClick.AddListener(LoadNextLevel);
+        homeWonButton.onClick.AddListener(OnHomeClicked);
+        homeLoseButton.onClick.AddListener(OnHomeClicked);
         HideGameOverScreen();
         HideWonScreen();
     }
@@ -72,6 +78,17 @@ public class UIManager : MonoBehaviour
 
          wonStatsText.text = $"Final Score: {finalScore}\nMoves: {moves}\nTime: {minutes:00}:{seconds:00}";
     }
+    private void LoadNextLevel()
+    {
+        int currentLevel = ProgressManager.Instance.GetSelectedLevel();
+        int nextLevel = currentLevel + 1;
+
+        if (ProgressManager.Instance.IsLevelUnlocked(nextLevel))
+        {
+            ProgressManager.Instance.SetSelectedLevel(nextLevel);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
 
 
     public void ShowLoseScreen()
@@ -92,5 +109,9 @@ public class UIManager : MonoBehaviour
     private void OnRestartClicked()
     {
         EventManager.OnGameRestart?.Invoke();
+    }
+    private void OnHomeClicked()
+    {
+        SceneManager.LoadScene("Home");
     }
 }

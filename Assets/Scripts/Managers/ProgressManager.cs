@@ -56,12 +56,10 @@ public class ProgressManager : MonoBehaviour
         {
             string json = File.ReadAllText(saveFilePath);
             progressData = JsonUtility.FromJson<LevelProgressData>(json);
-            Debug.Log("Progress loaded from: " + saveFilePath);
         }
         else
         {
             progressData = new LevelProgressData();
-            Debug.Log("No save file found, created new progress");
         }
     }
 
@@ -69,7 +67,6 @@ public class ProgressManager : MonoBehaviour
     {
         string json = JsonUtility.ToJson(progressData, true);
         File.WriteAllText(saveFilePath, json);
-        Debug.Log("Progress saved to: " + saveFilePath);
     }
 
     public void SetSelectedLevel(int levelNumber)
@@ -122,6 +119,5 @@ public class ProgressManager : MonoBehaviour
 
         progressData = new LevelProgressData();
         UnlockLevel(1);
-        Debug.Log("Progress reset");
     }
 }

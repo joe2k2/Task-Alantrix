@@ -12,7 +12,6 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private Button quitButton;
 
     [Header("Level Selection")]
-    [SerializeField] private Button backButton;
     [SerializeField] private Transform levelButtonsContainer;
     [SerializeField] private GameObject levelButtonPrefab;
     [SerializeField] private GameConfig[] allLevels;
@@ -21,7 +20,6 @@ public class MenuManager : MonoBehaviour
     {
         startButton.onClick.AddListener(() => ShowLevelSelection());
         quitButton.onClick.AddListener(() => Application.Quit());
-        //backButton.onClick.AddListener(() => ShowMenu());
 
         CreateLevelButtons();
         ShowMenu();

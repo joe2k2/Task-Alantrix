@@ -131,7 +131,7 @@ public class GridManager : MonoBehaviour
     {
         foreach (var card in spawnedCards)
         {
-            card.SetInteractable(interactable);
+            //card.SetInteractable(interactable);
         }
     }
     
@@ -146,30 +146,4 @@ public class GridManager : MonoBehaviour
         }
         spawnedCards.Clear();
     }
-    public List<int> GetMatchedCardIndices()
-    {
-        List<int> matchedIndices = new List<int>();
-
-        for (int i = 0; i < spawnedCards.Count; i++)
-        {
-            if (spawnedCards[i].IsMatched)
-            {
-                matchedIndices.Add(i);
-            }
-        }
-        return matchedIndices;
-    }
-
-    public void RestoreMatchedCards(List<int> matchedIndices)
-    {
-        foreach (int index in matchedIndices)
-        {
-            if (index < spawnedCards.Count)
-            {
-                spawnedCards[index].Reveal();
-                spawnedCards[index].SetMatched();
-            }
-        }
-    }
-
 }
