@@ -11,7 +11,23 @@ public class GridManager : MonoBehaviour
     [SerializeField] private GridLayoutGroup gridLayoutGroup;
     
     private List<CardController> spawnedCards = new List<CardController>();
-    
+
+    private void OnEnable()
+    {
+        EventManager.OnStartGame += GenerateGrid;
+        EventManager.SetCardsInteractable += SetCardsInteractable;
+        EventManager.RevealAllCards += RevealAllCards;
+        EventManager.HideAllCards += HideAllCards;
+        EventManager.ClearGrid += ClearGrid;
+    }
+    private void OnDisable()
+    {
+        EventManager.OnStartGame -= GenerateGrid;
+        EventManager.SetCardsInteractable -= SetCardsInteractable;
+        EventManager.RevealAllCards -= RevealAllCards;
+        EventManager.HideAllCards -= HideAllCards;
+        EventManager.ClearGrid -= ClearGrid;
+    }
     public void GenerateGrid(GameConfig config, Action<CardController> onCardClicked)
     {
         ClearGrid();

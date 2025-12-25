@@ -3,6 +3,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GameConfig", menuName = "Card Game/Game Config")]
 public class GameConfig : ScriptableObject
 {
+    [Header("Level Info")]
+    public int levelNumber;
+
     [Header("Grid Settings")]
     public int gridColumns = 4;
     public int gridRows = 4;
@@ -21,4 +24,8 @@ public class GameConfig : ScriptableObject
 
     [Header("Card Settings")]
     public CardData[] availableCards;
+
+    [Header("Scoring")]
+    public int matchPoints = 100;
+    public int mismatchPenalty = 10;
 }

@@ -5,13 +5,10 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("Configuration")]
-    [SerializeField] private GameConfig gameConfig;
+    [Header("Level Configurations")]
+    [SerializeField] private GameConfig[] allLevelConfigs;
+    private GameConfig gameConfig;
     
-    [Header("Managers")]
-    [SerializeField] private GridManager gridManager;
-    [SerializeField] private UIManager uiManager;
-
     private List<CardController> selectedCards = new List<CardController>();
     private int maxSelectableCards = 2;
     private int movesCount;
@@ -24,19 +21,47 @@ public class GameManager : MonoBehaviour
     public event Action OnGameLost;
 
     private int currentScore = 0;
-    private int highScore = 0;
 
+    private void OnEnable()
+    {
+        EventManager.OnGameRestart += RestartGame;
+    }
+    private void OnDisable()
+    {
+        EventManager.OnGameRestart -= RestartGame;
+    }
     private void Start()
     {
+        int selectedLevel = ProgressManager.Instance.GetSelectedLevel();
+
+        LoadLevelConfig(selectedLevel);
+
         StartGame();
     }
-    
+
+    private void LoadLevelConfig(int levelNumber)
+    {
+        if (allLevelConfigs != null && allLevelConfigs.Length > 0)
+        {
+            foreach (GameConfig config in allLevelConfigs)
+            {
+                if (config.levelNumber == levelNumber)
+                {
+                    gameConfig = config;
+                    return;
+                }
+            }
+            gameConfig = allLevelConfigs[0];
+        }
+    }
+
+
     private void Update()
     {
         if (isGameActive && gameConfig.useTimer)
         {
             timeRemaining -= Time.deltaTime;
-            uiManager.UpdateTimer(timeRemaining);
+            EventManager.UpdateTimer?.Invoke(timeRemaining);
             
             if (timeRemaining <= 0)
             {
@@ -48,12 +73,14 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         ResetGame();
-        gridManager.GenerateGrid(gameConfig, OnCardClicked);
+
+        EventManager.OnStartGame?.Invoke(gameConfig, OnCardClicked);
+
         totalPairs = (gameConfig.gridColumns * gameConfig.gridRows) / 2;
         timeRemaining = gameConfig.gameDuration;
 
-        uiManager.UpdateMoves(movesCount);
-        uiManager.UpdateTimer(timeRemaining);
+        EventManager.UpdateMoves(movesCount);
+        EventManager.UpdateTimer?.Invoke(timeRemaining);
 
         if (gameConfig.showPreview)
         {
@@ -67,20 +94,20 @@ public class GameManager : MonoBehaviour
     private IEnumerator ShowPreviewSequence()
     {
         isGameActive = false;
-        gridManager.SetCardsInteractable(false);
+        //gridManager.SetCardsInteractable(false);
 
         yield return new WaitForSeconds(0.5f);
 
-        gridManager.RevealAllCards();
+        EventManager.RevealAllCards?.Invoke();
 
         yield return new WaitForSeconds(gameConfig.previewDuration);
 
-        gridManager.HideAllCards();
+        EventManager.HideAllCards?.Invoke();
 
         yield return new WaitForSeconds(0.5f);
 
         isGameActive = true;
-        gridManager.SetCardsInteractable(true);
+        //gridManager.SetCardsInteractable(true);
     }
 
 
@@ -110,7 +137,7 @@ public class GameManager : MonoBehaviour
         if (selectedCards.Count == maxSelectableCards)
         {
             movesCount++;
-            uiManager.UpdateMoves(movesCount);
+            EventManager.UpdateMoves(movesCount);
             StartCoroutine(CheckMatch());
         }
     }
@@ -166,29 +193,13 @@ public class GameManager : MonoBehaviour
     private void AddScore(int points)
     {
         currentScore += points;
-        uiManager.UpdateScore(currentScore);
+        EventManager.UpdateScore(currentScore);
     }
 
     private void SubtractScore(int points)
     {
         currentScore = Mathf.Max(0, currentScore - points);
-        uiManager.UpdateScore(currentScore);
-    }
-
-    private void CalculateFinalScore()
-    {
-        int timeBonus = gameConfig.useTimer ? Mathf.FloorToInt(timeRemaining * 10) : 0;
-        int movesPenalty = movesCount * 5;
-
-        currentScore = currentScore + timeBonus - movesPenalty;
-        currentScore = Mathf.Max(0, currentScore);
-
-        if (currentScore > highScore)
-        {
-            highScore = currentScore;
-            PlayerPrefs.SetInt("HighScore", highScore);
-            PlayerPrefs.Save();
-        }
+        EventManager.UpdateScore(currentScore);
     }
     private void GameOver(bool won)
     {
@@ -196,22 +207,21 @@ public class GameManager : MonoBehaviour
 
         if (won)
         {
-            CalculateFinalScore();
-            uiManager.ShowWinScreen(movesCount, gameConfig.gameDuration - timeRemaining, currentScore);
-            OnGameWon?.Invoke();
+            int levelNum = gameConfig.levelNumber;
+            ProgressManager.Instance.CompleteLevel(levelNum);
+
+            EventManager.ShowWinScreen(movesCount, gameConfig.gameDuration - timeRemaining, currentScore);
         }
         else
         {
-            uiManager.ShowLoseScreen();
-            OnGameLost?.Invoke();
+            EventManager.ShowLoseScreen();
         }
     }
-
-
     public void RestartGame()
     {
-        gridManager.ClearGrid();
+        EventManager.ClearGrid?.Invoke();
         StartGame();
-        uiManager.HideGameOverScreen();
+        EventManager.HideLoseScreen();
+        EventManager.HideWinScreen();
     }
 }
